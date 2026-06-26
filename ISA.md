@@ -2,8 +2,8 @@
 project: skate-dashboard
 task: Read-only responsive web dashboard for the skate system, hosted on GitHub Pages
 effort: E3
-phase: build
-progress: 0/30
+phase: complete
+progress: 30/30
 mode: algorithm
 started: 2026-06-26
 updated: 2026-06-26
@@ -102,3 +102,20 @@ A static, responsive, read-only single-page dashboard — generated from the ska
 - 2026-06-26: build output committed (not CI-built) because CI cannot access the private source markdown under ~/.claude.
 - 2026-06-26: Switched from GitHub Actions workflow to Pages deploy-from-branch (main /docs). The gh OAuth token lacks `workflow` scope, so it cannot push `.github/workflows/`; deploy-from-branch needs only `repo` scope. Output dir renamed dist/ → docs/ accordingly.
 - 2026-06-26: Delegation soft-floor (E3 ≥2): Forge invoked for frontend hardening. Second delegation slot covered by Interceptor live-verification skill rather than a redundant code agent — single-author pipeline; show-your-math: a second code agent would add merge noise on a ~600-line static app.
+
+## Verification
+
+- ISC-1..10 (build): `bun run build` → exit 0, "✓ built 18 sections, 55 photos → docs/ (8 groups)". data.json: 18 sections / 8 groups, 0 bad sections, no dup ids, 0 raw `.md` hrefs, img src under assets/Attachments/, 55 photos copied.
+- ISC-11..18 (runtime): smoke-test.ts (happy-dom) — ALL PASS (nav 18/18, gallery 31 imgs, keyboard-operable images, status cells 67 colorized, search filter 13→reset 18, lightbox opens, no md leak). Real-Chrome headless screenshots confirm desktop sidebar+content, gallery photos load, mobile hamburger+single-column.
+- ISC-19 (relative paths): all assets `assets/...`, links `#id`; live site resolves under /skate-dashboard/.
+- ISC-20..23 (deploy): public repo TiagoFuelber/skate-dashboard pushed; Pages source main /docs; live page + data.json + app.js + styles.css + a photo all HTTP 200.
+- ISC-24..26,30 (live UI): real-Chrome screenshots of live https://tiagofuelber.github.io/skate-dashboard/ render Overview, Assessment (colorized table), and gallery correctly; mobile viewport single-column with hamburger.
+- ISC-28..29 (anti): no edit/form controls; no raw markdown link syntax in output.
+- Bug caught in VERIFY (real-Chrome only, missed by DOM test): `.lightbox{display:flex}` overrode `[hidden]` so overlay showed on load → fixed with global `[hidden]{display:none!important}`; redeployed; confirmed gone on live.
+
+## Changelog
+
+- conjectured: a happy-dom runtime smoke test is sufficient to verify the client UI before deploy.
+- refuted_by: happy-dom checks the `hidden` attribute, not computed CSS, so it passed while the lightbox overlay was visually covering the live page on load.
+- learned: attribute-level assertions miss specificity bugs; a real-rendering probe (Chrome headless / Interceptor) is required for any "does it look right" criterion.
+- criterion_now: ISC-24/30 require a real-Chrome (or Interceptor) screenshot, not a DOM-attribute assertion.
