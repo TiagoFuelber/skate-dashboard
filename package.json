@@ -1,0 +1,16 @@
+{
+  "name": "skate-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Read-only responsive dashboard for Tiago's skateboarding system",
+  "scripts": {
+    "build": "bun run build.ts"
+  },
+  "dependencies": {
+    "marked": "^12.0.0"
+  },
+  "devDependencies": {
+    "happy-dom": "^20.10.6"
+  }
+}
