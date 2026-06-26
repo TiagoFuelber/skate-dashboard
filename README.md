@@ -15,9 +15,9 @@ on a laptop or phone instead of opening raw markdown in an editor.
 
 - **Source of record:** the markdown lives in `~/.claude/PAI/USER/SKATEBOARDING/` — never edited here.
 - **`build.ts`** (Bun) reads that markdown, renders it to HTML with `marked`, rewrites internal
-  `.md` links to in-app `#hash` routes, copies the photo galleries, and writes a static `dist/`.
-- **`dist/`** is committed. GitHub Pages serves it via `.github/workflows/deploy.yml`
-  (CI only uploads the prebuilt snapshot — it has no access to the private source files).
+  `.md` links to in-app `#hash` routes, copies the photo galleries, and writes a static `docs/`.
+- **`docs/`** is committed. GitHub Pages serves it directly from the `main` branch `/docs` folder
+  (deploy-from-branch — no Actions workflow or extra token scope needed).
 - The frontend is a tiny dependency-free SPA: `index.html` + `app.js` + `styles.css`.
 
 ## Rebuild after updating the skate notes
@@ -25,7 +25,7 @@ on a laptop or phone instead of opening raw markdown in an editor.
 ```bash
 cd ~/Projects/skate-dashboard
 bun install        # first time only
-bun run build      # regenerates dist/ from ~/.claude/PAI/USER/SKATEBOARDING/
+bun run build      # regenerates docs/ from ~/.claude/PAI/USER/SKATEBOARDING/
 git add -A && git commit -m "rebuild snapshot" && git push
 ```
 
@@ -35,5 +35,5 @@ The push triggers the Pages deploy. Point at a different source with `SKATE_SRC=
 
 ```bash
 bun run build
-cd dist && bunx serve   # or: python3 -m http.server
+cd docs && python3 -m http.server   # or: bunx serve
 ```

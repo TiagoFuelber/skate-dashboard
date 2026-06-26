@@ -23,7 +23,9 @@ import { join, basename } from "node:path";
 const SRC = process.env.SKATE_SRC || join(homedir(), ".claude/PAI/USER/SKATEBOARDING");
 const ROOT = import.meta.dir;
 const SRC_STATIC = join(ROOT, "src");
-const DIST = join(ROOT, "dist");
+// Output to docs/ so GitHub Pages can serve it directly from the main branch
+// (deploy-from-branch needs no `workflow` token scope).
+const DIST = join(ROOT, "docs");
 
 if (!existsSync(SRC)) {
   console.error(`✗ source not found: ${SRC}`);
@@ -272,5 +274,5 @@ writeFileSync(join(DIST, "data.json"), JSON.stringify(data));
 writeFileSync(join(DIST, ".nojekyll"), "");
 
 console.log(
-  `✓ built ${sections.length} sections, ${photoCount} photos → dist/  (${groups.length} groups)`,
+  `✓ built ${sections.length} sections, ${photoCount} photos → docs/  (${groups.length} groups)`,
 );

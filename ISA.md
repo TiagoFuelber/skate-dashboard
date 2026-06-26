@@ -60,9 +60,9 @@ A static, responsive, read-only single-page dashboard — generated from the ska
 - [ ] ISC-17: layout is single-column with an off-canvas drawer at phone width (≤640px)
 - [ ] ISC-18: layout is sidebar + content at laptop width (≥1024px)
 - [ ] ISC-19: all asset/link paths are relative (no leading `/`), so it works under `/skate-dashboard/`
-- [ ] ISC-20: `.github/workflows/deploy.yml` exists and uploads `./dist` as a Pages artifact
+- [ ] ISC-20: build output committed to `docs/` (Pages deploy-from-branch source)
 - [ ] ISC-21: public repo `TiagoFuelber/skate-dashboard` created and pushed
-- [ ] ISC-22: GitHub Pages enabled (build_type workflow) and deploy workflow run succeeds
+- [ ] ISC-22: GitHub Pages enabled (source: main /docs) and serving
 - [ ] ISC-23: live URL returns HTTP 200
 - [ ] ISC-24: live site renders the dashboard (Interceptor screenshot shows nav + content)
 - [ ] ISC-25: live site renders correctly at phone viewport (Interceptor mobile screenshot)
@@ -99,5 +99,6 @@ A static, responsive, read-only single-page dashboard — generated from the ska
 
 - 2026-06-26: User informed of public-exposure risk (all data publish:false, includes spot locations near home); user chose "Public GitHub Pages, full data". Proceeding with full public deploy per explicit instruction.
 - 2026-06-26: Style = clean light / minimal docs (user choice).
-- 2026-06-26: dist/ committed (not CI-built) because CI cannot access the private source markdown under ~/.claude. Workflow only uploads the prebuilt artifact.
+- 2026-06-26: build output committed (not CI-built) because CI cannot access the private source markdown under ~/.claude.
+- 2026-06-26: Switched from GitHub Actions workflow to Pages deploy-from-branch (main /docs). The gh OAuth token lacks `workflow` scope, so it cannot push `.github/workflows/`; deploy-from-branch needs only `repo` scope. Output dir renamed dist/ → docs/ accordingly.
 - 2026-06-26: Delegation soft-floor (E3 ≥2): Forge invoked for frontend hardening. Second delegation slot covered by Interceptor live-verification skill rather than a redundant code agent — single-author pipeline; show-your-math: a second code agent would add merge noise on a ~600-line static app.

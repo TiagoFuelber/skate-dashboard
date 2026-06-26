@@ -4,7 +4,7 @@ import { Window } from "happy-dom";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-const DIST = join(import.meta.dir, "dist");
+const DIST = join(import.meta.dir, "docs");
 const html = readFileSync(join(DIST, "index.html"), "utf8");
 const appJs = readFileSync(join(DIST, "app.js"), "utf8");
 const data = JSON.parse(readFileSync(join(DIST, "data.json"), "utf8"));
