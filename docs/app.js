@@ -171,8 +171,16 @@
       const thumb = document.createElement("img");
       thumb.className = "spot-thumb";
       thumb.loading = "lazy";
-      thumb.src = e.src;
       thumb.alt = "";
+      // prefer the lightweight build-time thumbnail; fall back to the full image
+      const thumbSrc = e.src.replace(/\.(jpe?g|png|webp)$/i, ".thumb.$1");
+      thumb.src = thumbSrc;
+      if (thumbSrc !== e.src) {
+        thumb.onerror = () => {
+          thumb.onerror = null;
+          thumb.src = e.src;
+        };
+      }
 
       const m = document.createElement("div");
       m.className = "spot-meta";

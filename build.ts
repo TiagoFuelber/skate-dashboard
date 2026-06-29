@@ -19,6 +19,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { join, basename } from "node:path";
+import { execFileSync } from "node:child_process";
 
 const SRC = process.env.SKATE_SRC || join(homedir(), ".claude/PAI/USER/SKATEBOARDING");
 const ROOT = import.meta.dir;
@@ -260,6 +261,35 @@ if (existsSync(attSrc)) {
   });
 }
 
+// Generate small thumbnails (max 240px long edge) beside each gallery photo so
+// the mobile spot list stays lightweight. The list points at `*.thumb.ext`;
+// the lightbox still loads the full-resolution image. Falls back to the full
+// image at runtime if a thumbnail is missing.
+let thumbCount = 0;
+if (existsSync(attSrc)) {
+  const attDst = join(DIST, "assets", "Attachments");
+  const makeThumbs = (dir: string) => {
+    for (const name of readdirSync(dir)) {
+      const p = join(dir, name);
+      if (statSync(p).isDirectory()) {
+        makeThumbs(p);
+        continue;
+      }
+      if (!/\.(jpe?g|png|webp)$/i.test(name) || /\.thumb\.[^.]+$/i.test(name)) continue;
+      const thumb = p.replace(/\.([^.]+)$/, ".thumb.$1");
+      const args = ["-Z", "240", p, "-o", thumb];
+      if (/\.jpe?g$/i.test(name)) args.push("--setProperty", "formatOptions", "60");
+      try {
+        execFileSync("sips", args, { stdio: "ignore" });
+        thumbCount++;
+      } catch {
+        /* sips unavailable or failed — runtime falls back to the full image */
+      }
+    }
+  };
+  makeThumbs(attDst);
+}
+
 const groups = GROUP_ORDER.filter((g) => sections.some((s) => s.group === g)).map((g) => ({
   name: g,
   items: sections.filter((s) => s.group === g).map((s) => ({ id: s.id, title: s.title })),
@@ -274,5 +304,5 @@ writeFileSync(join(DIST, "data.json"), JSON.stringify(data));
 writeFileSync(join(DIST, ".nojekyll"), "");
 
 console.log(
-  `✓ built ${sections.length} sections, ${photoCount} photos → docs/  (${groups.length} groups)`,
+  `✓ built ${sections.length} sections, ${photoCount} photos, ${thumbCount} thumbs → docs/  (${groups.length} groups)`,
 );
