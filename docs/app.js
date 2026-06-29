@@ -78,7 +78,7 @@
     articleEl.innerHTML =
       '<div class="section-meta">' + meta.join("") + "</div>" + sec.html;
 
-    enhance(articleEl);
+    enhance(articleEl, sec);
     setActive(id);
     document.title = sec.title + " · Skate System";
     mainEl.scrollTop = 0;
@@ -87,7 +87,9 @@
   }
 
   // wrap tables, colorize status cells
-  function enhance(root) {
+  function enhance(root, sec) {
+    // photo-spot pages → compact skimmable list (thumbnail + name/code/desc)
+    if (sec && sec.group === "Spots" && /^spots-/.test(sec.id)) buildSpotList(root);
     root.querySelectorAll("table").forEach((t) => {
       if (!t.parentElement.classList.contains("table-wrap")) {
         const w = document.createElement("div");
@@ -114,6 +116,91 @@
       a.target = "_blank";
       a.rel = "noopener noreferrer";
     });
+  }
+
+  // Turn an obstacle-photo page (h2 + optional blockquote + image, repeated)
+  // into a compact, skimmable list of clickable cards.
+  function buildSpotList(root) {
+    const h2s = Array.from(root.querySelectorAll("h2"));
+    const entries = [];
+    const removal = [];
+    let firstH2 = null;
+
+    h2s.forEach((h2) => {
+      let desc = "";
+      let img = null;
+      const group = [h2];
+      let node = h2.nextElementSibling;
+      while (node && node.tagName !== "H2") {
+        if (node.tagName === "BLOCKQUOTE") desc = node.textContent.trim();
+        const im = node.matches && node.matches("img.gallery-img")
+          ? node
+          : node.querySelector && node.querySelector("img.gallery-img");
+        if (im && !img) img = im;
+        group.push(node);
+        node = node.nextElementSibling;
+      }
+      if (!img) return; // not an obstacle entry — leave it untouched
+
+      const codeEl = h2.querySelector("code");
+      const code = codeEl ? codeEl.textContent.trim() : "";
+      const tmp = h2.cloneNode(true);
+      tmp.querySelectorAll("code").forEach((c) => c.remove());
+      const name = tmp.textContent.trim();
+
+      entries.push({ name, code, desc, src: img.src, alt: img.alt || name });
+      if (!firstH2) firstH2 = h2;
+      group.forEach((n) => removal.push(n));
+    });
+
+    if (!entries.length || !firstH2) return;
+
+    const ul = document.createElement("ul");
+    ul.className = "spot-list";
+    entries.forEach((e) => {
+      const li = document.createElement("li");
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "spot-item";
+      btn.dataset.full = e.src;
+      btn.dataset.name = e.name;
+      btn.dataset.code = e.code;
+      btn.dataset.desc = e.desc;
+      btn.dataset.alt = e.alt;
+
+      const thumb = document.createElement("img");
+      thumb.className = "spot-thumb";
+      thumb.loading = "lazy";
+      thumb.src = e.src;
+      thumb.alt = "";
+
+      const m = document.createElement("div");
+      m.className = "spot-meta";
+      const nm = document.createElement("span");
+      nm.className = "spot-name";
+      nm.textContent = e.name;
+      m.appendChild(nm);
+      if (e.code) {
+        const cd = document.createElement("span");
+        cd.className = "spot-code";
+        cd.textContent = e.code;
+        m.appendChild(cd);
+      }
+      if (e.desc) {
+        const ds = document.createElement("span");
+        ds.className = "spot-desc";
+        ds.textContent = e.desc;
+        m.appendChild(ds);
+      }
+
+      btn.appendChild(thumb);
+      btn.appendChild(m);
+      li.appendChild(btn);
+      ul.appendChild(li);
+    });
+
+    firstH2.parentNode.insertBefore(ul, firstH2);
+    removal.forEach((n) => n.remove());
   }
 
   // ── Routing ───────────────────────────────────────────────
@@ -208,18 +295,45 @@
   // ── Lightbox ──────────────────────────────────────────────
   const lb = $("#lightbox");
   const lbImg = $("#lightboxImg");
+  const lbTitle = $("#lightboxTitle");
   const lbCap = $("#lightboxCap");
   const lbClose = lb.querySelector(".lightbox-close");
   let lbOpener = null;
+
+  function showLb() {
+    lb.hidden = false;
+    lbClose.focus();
+  }
 
   function openLightbox(img) {
     lbOpener = img;
     lbImg.src = img.src;
     lbImg.alt = img.alt || "";
+    lbTitle.textContent = "";
+    lbTitle.hidden = true;
     lbCap.textContent = img.alt || "";
-    lb.hidden = false;
-    lbClose.focus();
+    lbCap.hidden = !img.alt;
+    showLb();
   }
+
+  function openSpot(btn) {
+    lbOpener = btn;
+    lbImg.src = btn.dataset.full;
+    lbImg.alt = btn.dataset.alt || "";
+    lbTitle.textContent = btn.dataset.name || "";
+    if (btn.dataset.code) {
+      const c = document.createElement("span");
+      c.className = "lb-code";
+      c.textContent = btn.dataset.code;
+      lbTitle.appendChild(document.createTextNode(" "));
+      lbTitle.appendChild(c);
+    }
+    lbTitle.hidden = !(btn.dataset.name || btn.dataset.code);
+    lbCap.textContent = btn.dataset.desc || "";
+    lbCap.hidden = !btn.dataset.desc;
+    showLb();
+  }
+
   function closeLb() {
     lb.hidden = true;
     lbImg.src = "";
@@ -227,6 +341,8 @@
     lbOpener = null;
   }
   articleEl.addEventListener("click", (e) => {
+    const spot = e.target.closest(".spot-item");
+    if (spot) return openSpot(spot);
     const img = e.target.closest("img.gallery-img");
     if (img) openLightbox(img);
   });

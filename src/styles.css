@@ -250,6 +250,65 @@ td.st-notyet { background: var(--notyet-bg) !important; color: var(--notyet); }
 }
 .article h2 + p > img.gallery-img { margin-top: 0.3em; }
 
+/* ── Spot list (obstacle photo pages) ───────────────────── */
+.spot-list {
+  list-style: none;
+  padding: 0;
+  margin: 1.4em 0 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+@media (min-width: 720px) {
+  .spot-list { grid-template-columns: 1fr 1fr; gap: 12px; }
+}
+.spot-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  padding: 10px;
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.spot-item:hover { border-color: var(--border-strong); box-shadow: 0 1px 7px rgba(0, 0, 0, 0.06); }
+.spot-item:active { background: var(--code-bg); }
+.spot-item:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.spot-thumb {
+  flex: 0 0 auto;
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--code-bg);
+}
+.spot-meta { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.spot-name { font-weight: 650; font-size: 1rem; letter-spacing: -0.01em; }
+.spot-code {
+  align-self: flex-start;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  background: var(--code-bg);
+  border-radius: 5px;
+  padding: 1px 6px;
+}
+.spot-desc {
+  font-size: 0.84rem;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ── Lightbox ───────────────────────────────────────────── */
 .lightbox {
   position: fixed;
@@ -262,8 +321,23 @@ td.st-notyet { background: var(--notyet-bg) !important; color: var(--notyet); }
   justify-content: center;
   padding: 28px;
 }
-.lightbox img { max-width: 96vw; max-height: 82vh; border-radius: 8px; }
-.lightbox-cap { color: #e7e7e7; font-size: 0.9rem; margin-top: 14px; text-align: center; }
+.lightbox img { max-width: 96vw; max-height: 74vh; border-radius: 8px; }
+.lightbox-title {
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  margin: 16px 0 0;
+  text-align: center;
+}
+.lightbox-title .lb-code {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #b9bcc2;
+  margin-left: 6px;
+}
+.lightbox-cap { color: #cdd0d4; font-size: 0.9rem; margin-top: 8px; text-align: center; max-width: 60ch; }
 .lightbox-close {
   position: absolute;
   top: 14px;

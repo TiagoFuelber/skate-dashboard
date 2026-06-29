@@ -37,15 +37,17 @@ check("nav renders a link per section", navLinks.length === data.sections.length
 const article = doc.querySelector("#article");
 check("default section rendered", !!article && article.innerHTML.length > 200, `${article?.innerHTML.length} chars`);
 
-// route to a gallery section
+// route to a gallery section → obstacles render as a skimmable spot list
 win.location.hash = "#spots-orla";
 win.dispatchEvent(new win.Event("hashchange"));
 await new Promise((r) => setTimeout(r, 30));
-const galleryImgs = doc.querySelectorAll("#article img.gallery-img");
-check("gallery renders photos", galleryImgs.length >= 31, `${galleryImgs.length} imgs`);
-const firstImg = galleryImgs[0] as any;
-check("gallery img is keyboard-operable", firstImg?.getAttribute("role") === "button" && firstImg?.tabIndex === 0);
-check("img src points at assets/", (firstImg?.getAttribute("src") || "").startsWith("assets/Attachments/"), firstImg?.getAttribute("src"));
+const spotItems = doc.querySelectorAll("#article .spot-item");
+check("spot list renders one item per obstacle", spotItems.length >= 31, `${spotItems.length} items`);
+const firstItem = spotItems[0] as any;
+check("spot item is a native button", firstItem?.tagName === "BUTTON" && firstItem?.getAttribute("type") === "button");
+check("spot item carries name + full image", !!firstItem?.dataset.name && !!firstItem?.dataset.full);
+const firstThumb = doc.querySelector("#article .spot-item .spot-thumb") as any;
+check("spot thumb src points at assets/", (firstThumb?.getAttribute("src") || "").includes("assets/Attachments/"), firstThumb?.getAttribute("src"));
 
 // route to assessment, check status colorization
 win.location.hash = "#assessment";
@@ -68,14 +70,16 @@ await new Promise((r) => setTimeout(r, 140));
 const afterReset = [...doc.querySelectorAll("#nav a")].filter((a: any) => !a.hidden);
 check("search reset restores all", afterReset.length === data.sections.length, `${afterReset.length}`);
 
-// lightbox opens on image click
+// clicking a spot opens the full-screen popup with details
 win.location.hash = "#spots-iapi";
 win.dispatchEvent(new win.Event("hashchange"));
 await new Promise((r) => setTimeout(r, 30));
-const img = doc.querySelector("#article img.gallery-img") as any;
-img.dispatchEvent(new win.Event("click", { bubbles: true }));
+const spot = doc.querySelector("#article .spot-item") as any;
+spot.dispatchEvent(new win.Event("click", { bubbles: true }));
 const lb = doc.querySelector("#lightbox") as any;
-check("lightbox opens on photo click", lb.hidden === false);
+check("lightbox opens on spot click", lb.hidden === false);
+const lbTitle = doc.querySelector("#lightboxTitle") as any;
+check("lightbox shows obstacle details", !lbTitle.hidden && lbTitle.textContent.length > 0, lbTitle.textContent);
 
 // no raw markdown link syntax leaked into any section html
 const leak = data.sections.some((s: any) => /\]\([^)]*\.md\)/.test(s.html));
